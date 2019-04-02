@@ -59,9 +59,9 @@ public class CommentServiceimpl implements CommentService {
 
     @Override
     public CommentUsernameProtocol addComment(Comment c){
-        cr.save(c);
-        String username = this.ur.findById(c.getUserId()).map(User::getName).orElse(null);
-        return new CommentUsernameProtocol(c, username);
+        return new CommentUsernameProtocol(cr.save(c), this.ur.findById(c.getUserId())
+                .map(User::getName)
+                .orElse(null));
     }
 
     @Override

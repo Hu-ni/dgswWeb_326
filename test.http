@@ -35,7 +35,7 @@ POST http://localhost:8080/comment
 Content-Type: application/json
 
 {
-  "userId": "2",
+  "userId": "1",
   "content": "Hello World!"
 
 }
@@ -46,7 +46,7 @@ PUT http://localhost:8080/updateComment/2
 Content-Type: application/json
 
 {
-  "userId": "2",
+  "userId": "1",
   "content": "after"
 }
 

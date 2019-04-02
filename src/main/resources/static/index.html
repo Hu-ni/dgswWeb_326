@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Comments</title>
+    <script
+            src="http://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<h1>유저 글 목록</h1>
+    <div>
+        <div>
+            <input type="text" id="content" placeholder="Comment">
+            <button onclick="addNewComment()">작성</button>
+            <button onclick="list()">조회</button>
+        </div>
+        <div>
+            <input type="file" id="upload-file">
+            <button onclick="uploadFile()">파일업로드</button>
+        </div>
+
+        <div id="comment_list"></div>
+    </div>
+
+<script>
+    async function uploadFile(){
+        try{
+            let file = $('#upload-file')[0].files[0];
+            let formData = new FormData();
+            formData.append('srcFile',file);
+            let result = await $.ajax({
+                type: "POST",
+                url: '/attachment',
+                data: formData,
+                processData: false,
+                contentType: false
+            });
+            console.log(JSON.stringify(result));
+        }catch (e) {
+            console.log(JSON.stringify(e));
+        }
+
+    }
+
+    async function list() {
+        try{
+            let list = await $.get("/list");
+            // $("#comment_list").html(JSON.stringify(list));
+            for(let i =0; i < list.length; i++){
+                let comment = list[i];
+                $("#comment_list").append(`<div id="line${comment.id}" style="display: flex; border-bottom: 1px solid silver;">
+                                        <div style="width: 150px;">${comment.username}</div>
+                                        <div style="width: 350px;">${comment.content}</div>
+                                        <div>
+                                            <button onclick="updateComment(this, ${comment.id})">수정</button>
+                                            <button onclick="removeComment(this, ${comment.id})">삭제</button>
+                                        </div>
+                                        </div>`);
+            }
+        }catch(err){
+            $("#comment_list").html(JSON.stringify(err));
+        }
+    }
+
+    async function addNewComment(){
+        let comment ={
+            userId: 1,
+            content: $("#content").val()
+        };
+        try{
+            let result = await $.ajax({
+                url: "/comment",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(comment)
+            })
+
+            $("#comment_list").append(`<div id="line${result.id}" style="display: flex; border-bottom: 1px solid silver;">
+                                            <div style="width: 150px;">${result.username}</div>
+                                            <div style="width: 350px;">${result.content}</div>
+                                            <div>
+                                                <button onclick="updateComment(this, ${result.id})">수정</button>
+                                                <button onclick="removeComment(this, ${result.id})">삭제</button>
+                                            </div>
+                                            </div>`);
+        }catch(err){
+            $("#comment_list").html(JSON.stringify(err));
+        }
+
+    }
+
+    let content = null;
+    async function removeComment(btn, id) {
+        if($(btn).text() === "삭제"){
+            try{
+                let result = await $.ajax({
+                    type: "DELETE",
+                    url: `/deleteComment/${id}`
+                });
+
+                if(result === true) $(`#line${id}`).remove();
+                else alert("삭제하지 못했습니다.")
+            }catch(err) {
+                $("#comment_list").html(JSON.stringify(err));
+            }
+        }else{
+            $(btn).text("삭제");
+            $(btn).prev().text("수정");
+            $(`#line${id}`).find("div:nth-child(2)").html(content);
+        }
+
+    }
+
+    async function updateComment(btn, id){
+        if($(btn).text() === "수정"){
+            let line = $(`#line${id}`);
+            content = line.find("div:nth-child(2)").html();
+            let input = `<input id="modify${id}" value="${content}">`
+            line.find("div:nth-child(2)").html(input);
+            $(btn).text("확인");
+            $(btn).next().text("취소");
+        }else{
+            let comment = {
+                userId: 1,
+                content: $(`#modify${id}`).val()
+            };
+            let result = await $.ajax({
+                type: "PUT",
+                url: `/updateComment/${id}`,
+                data: JSON.stringify(comment),
+                contentType: "application/json"
+            });
+            $(`#line${id}`).find("div:nth-child(2)").html(result.content);
+            $(btn).text("수정");
+            $(btn).next().text("삭제");
+        }
+
+    }
+</script>
+</body>
+</html>

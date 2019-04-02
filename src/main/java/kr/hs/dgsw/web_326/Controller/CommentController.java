@@ -20,7 +20,7 @@ public class CommentController {
     }
 
     @GetMapping("/viewComment/{id}")
-    public CommentUsernameProtocol view(Long id){return this.cs.view(id);}
+    public CommentUsernameProtocol view(@PathVariable  Long id){return this.cs.view(id);}
 
     @PostMapping("/comment")
     public CommentUsernameProtocol addComment(@RequestBody Comment c){
@@ -30,6 +30,6 @@ public class CommentController {
     @PutMapping("/updateComment/{id}")
     public CommentUsernameProtocol updateComment(@PathVariable Long id, @RequestBody Comment c){return this.cs.updateComment(id, c);}
 
-    @DeleteMapping("deleteComment/{id}")
+    @DeleteMapping("/deleteComment/{id}")
     public boolean deleteComment(@PathVariable Long id){return this.cs.deleteComment(id);}
 }
