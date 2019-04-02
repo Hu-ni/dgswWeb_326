@@ -9,22 +9,89 @@
             crossorigin="anonymous"></script>
 </head>
 <body>
-<h1>유저 글 목록</h1>
+<h1>유저 목록</h1>
+    <div>
+        <div>
+            <input type="text" id="name" placeholder="Name">
+            <input type="text" id="email" placeholder="Email">
+            <button onclick="addNewUser()">작성</button>
+            <button onclick="listUser()">조회</button>
+            <br>
+            <input type="file" id="upload-file">
+            <button onclick="uploadFile()">파일업로드</button>
+        </div>
+        <div id="user_list"></div>
+    </div>
+<h1>글 목록</h1>
     <div>
         <div>
             <input type="text" id="content" placeholder="Comment">
             <button onclick="addNewComment()">작성</button>
-            <button onclick="list()">조회</button>
+            <button onclick="listComment()">조회</button>
         </div>
-        <div>
-            <input type="file" id="upload-file">
-            <button onclick="uploadFile()">파일업로드</button>
-        </div>
-
         <div id="comment_list"></div>
     </div>
 
+
 <script>
+    async function listUser(){
+        try{
+            let list = await $.get("/listUser");
+            for(let i =0; i < list.length; i++){
+                let user = list[i];
+                $("#user_list").append(`<div id="line${user.id}" style="display: flex; border-bottom: 1px solid silver;">
+                                        <div style="width: 150px;">${user.name}</div>
+                                        <div style="width: 350px;">${user.email}</div>
+                                        <div>
+                                            <button onclick="removeUser(${user.id})">삭제</button>
+                                        </div>
+                                        </div>`);
+            }
+        }catch(err){
+            $("#user_list").html(JSON.stringify(err));
+        }
+    }
+    async function addNewUser(){
+        let user ={
+            name: $("#name").val(),
+            email: $("#email").val(),
+        };
+        try{
+            let result = await $.ajax({
+                url: "/addUser",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(user)
+            })
+
+            $("#user_list").append(`<div id="line${result.id}" style="display: flex; border-bottom: 1px solid silver;">
+                                            <div style="width: 150px;">${result.name}</div>
+                                            <div style="width: 350px;">${result.email}</div>
+                                            <div>
+                                                <button onclick="removeUser(${result.id})">삭제</button>
+                                            </div>
+                                            </div>`);
+        }catch(err){
+            $("#user_list").html(JSON.stringify(err));
+        }
+
+    }
+
+    async function removeUser(id){
+        try{
+            let result = await $.ajax({
+                type: "DELETE",
+                url: `/deleteUser/${id}`
+            });
+
+            if(result === true) $(`#line${id}`).remove();
+            else alert("삭제하지 못했습니다.")
+        }catch(err) {
+            $("#user_list").html(JSON.stringify(err));
+        }
+    }
+
     async function uploadFile(){
         try{
             let file = $('#upload-file')[0].files[0];
@@ -41,10 +108,10 @@
         }catch (e) {
             console.log(JSON.stringify(e));
         }
-
     }
-
-    async function list() {
+</script>
+<script>
+    async function listComment() {
         try{
             let list = await $.get("/list");
             // $("#comment_list").html(JSON.stringify(list));
@@ -137,7 +204,6 @@
             $(btn).text("수정");
             $(btn).next().text("삭제");
         }
-
     }
 </script>
 </body>

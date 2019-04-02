@@ -38,6 +38,8 @@ public class UserServiceimpl implements UserService{
                 .map(user -> {
                     user.setName(Optional.ofNullable(u.getName()).orElse(user.getName()));
                     user.setEmail(Optional.ofNullable(u.getEmail()).orElse(user.getEmail()));
+                    user.setStoredPath(Optional.ofNullable(u.getStoredPath()).orElse(user.getStoredPath()));
+                    user.setOriginalFilename(Optional.ofNullable(u.getOriginalFilename()).orElse(user.getOriginalFilename()));
                     return this.ur.save(user);
                 })
                 .orElse(null);

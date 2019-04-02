@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,8 +17,10 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    private  String name;
+    private String name;
     private String email;
+    private String storedPath;
+    private String originalFilename;
 
     @CreationTimestamp
     private LocalDateTime created;
@@ -29,5 +30,14 @@ public class User {
     public User(String username, String email){
         this.name = username;
         this.email = email;
+        this.storedPath = null;
+        this.originalFilename = null;
+    }
+
+    public User(String name, String email, String storedPath, String originalFilename) {
+        this.name = name;
+        this.email = email;
+        this.storedPath = storedPath;
+        this.originalFilename = originalFilename;
     }
 }

@@ -1,5 +1,6 @@
 package kr.hs.dgsw.web_326.Controller;
 
+import kr.hs.dgsw.web_326.Protocol.AttachmentProtocol;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +16,7 @@ import java.util.UUID;
 public class AttachmentController {
 
     @PostMapping("/attachment")
-    public String upload(@RequestPart MultipartFile srcFile){
+    public AttachmentProtocol upload(@RequestPart MultipartFile srcFile){
         String destFilename = "D:\\WorkSpace\\Java\\2019\\IdeaProjects\\web_326\\upload\\"
                 + LocalDateTime.now().format(DateTimeFormatter.ofPattern(("yyyy/MM/dd/")))
                 + UUID.randomUUID().toString() + "_"
@@ -25,7 +26,7 @@ public class AttachmentController {
             File destFile = new File(destFilename);
             destFile.getParentFile().mkdirs();
             srcFile.transferTo(destFile);
-            return destFilename;
+            return new AttachmentProtocol(destFilename, srcFile.getOriginalFilename());
         } catch (IOException e) {
             return null;
         }
