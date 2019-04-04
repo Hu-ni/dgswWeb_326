@@ -19,9 +19,9 @@ public class UserController {
         return this.us.addUser(u);
     }
 
-    @PutMapping("/updateUser")
-    public User updateUser(@RequestBody User u){
-        return this.us.updateUser(u);
+    @PutMapping("/updateUser/{id}")
+    public User updateUser(@PathVariable Long id, @RequestBody User u){
+        return this.us.updateUser(id, u);
     }
 
     @DeleteMapping("/deleteUser/{id}")

@@ -16,9 +16,6 @@
             <input type="text" id="email" placeholder="Email">
             <button onclick="addNewUser()">작성</button>
             <button onclick="listUser()">조회</button>
-            <br>
-            <input type="file" id="upload-file">
-            <button onclick="uploadFile()">파일업로드</button>
         </div>
         <div id="user_list"></div>
     </div>
@@ -40,11 +37,14 @@
             for(let i =0; i < list.length; i++){
                 let user = list[i];
                 $("#user_list").append(`<div id="line${user.id}" style="display: flex; border-bottom: 1px solid silver;">
-                                        <div style="width: 150px;">${user.name}</div>
-                                        <div style="width: 350px;">${user.email}</div>
-                                        <div>
-                                            <button onclick="removeUser(${user.id})">삭제</button>
-                                        </div>
+                                            <div style="width: 100px;">${user.name}</div>
+                                            <div style="width: 150px;">${user.email}</div>
+                                            <div style="width: 150px;">${user.originalFilename}</div>
+                                            <div style="width: 350px;">${user.storedPath}</div>
+                                            <div>
+                                                <button onclick="updateUser(this, ${user.id})">수정</button>
+                                                <button onclick="removeUser(this, ${user.id})">삭제</button>
+                                            </div>
                                         </div>`);
             }
         }catch(err){
@@ -66,10 +66,13 @@
             })
 
             $("#user_list").append(`<div id="line${result.id}" style="display: flex; border-bottom: 1px solid silver;">
-                                            <div style="width: 150px;">${result.name}</div>
-                                            <div style="width: 350px;">${result.email}</div>
+                                            <div style="width: 100px;">${result.name}</div>
+                                            <div style="width: 150px;">${result.email}</div>
+                                            <div style="width: 150px;">${result.originalFilename}</div>
+                                            <div style="width: 350px;">${result.storedPath}</div>
                                             <div>
-                                                <button onclick="removeUser(${result.id})">삭제</button>
+                                                <button onclick="updateUser(this, ${result.id})">수정</button>
+                                                <button onclick="removeUser(this, ${result.id})">삭제</button>
                                             </div>
                                             </div>`);
         }catch(err){
@@ -78,38 +81,83 @@
 
     }
 
-    async function removeUser(id){
-        try{
-            let result = await $.ajax({
-                type: "DELETE",
-                url: `/deleteUser/${id}`
-            });
-
-            if(result === true) $(`#line${id}`).remove();
-            else alert("삭제하지 못했습니다.")
-        }catch(err) {
-            $("#user_list").html(JSON.stringify(err));
-        }
-    }
-
-    async function uploadFile(){
-        try{
-            let file = $('#upload-file')[0].files[0];
+    let name;
+    let email;
+    async function updateUser(btn, id){
+        if($(btn).text() === "수정"){
+            let line = $(`#line${id}`);
+            name = line.find("div:nth-child(1)").html();
+            email = line.find("div:nth-child(2)").html();
+            let input_name = `<input id="modifyName${id}" value="${name}">`
+            let input_email = `<input id="modifyEmail${id}" value="${email}">`
+            let input_file = '<input id="upload-file" type="file">'
+            line.find("div:nth-child(1)").html(input_name);
+            line.find("div:nth-child(2)").html(input_email);
+            line.find("div:nth-child(5)").append(input_file);
+            $(btn).text("확인");
+            $(btn).next().text("취소");
+        }else{
+            let file = $("#upload-file")[0].files[0];
             let formData = new FormData();
             formData.append('srcFile',file);
-            let result = await $.ajax({
+            let fileInfo = await $.ajax({
                 type: "POST",
                 url: '/attachment',
                 data: formData,
                 processData: false,
-                contentType: false
+                contentType: false,
+                async: false
             });
-            console.log(JSON.stringify(result));
-        }catch (e) {
-            console.log(JSON.stringify(e));
+
+            let user ={
+                name: $(`#modifyName${id}`).val(),
+                email: $(`#modifyEmail${id}`).val(),
+                storedPath: fileInfo.storedPath,
+                originalFilename: fileInfo.originalName
+            };
+            let result = await $.ajax({
+                type: "PUT",
+                url: `/updateUser/${id}`,
+                data: JSON.stringify(user),
+                contentType: "application/json"
+            });
+
+            $(`#line${id}`).find("div:nth-child(1)").html(result.name);
+            $(`#line${id}`).find("div:nth-child(2)").html(result.email);
+            $(`#line${id}`).find("div:nth-child(3)").html(result.originalFilename);
+            $(`#line${id}`).find("div:nth-child(4)").html(result.storedPath);
+
+            $(btn).text("수정");
+            $(btn).next().text("삭제");
+            $("#upload-file").remove();
         }
     }
+
+    async function removeUser(btn, id) {
+        if ($(btn).text() === "삭제") {
+            try {
+                let result = await $.ajax({
+                    type: "DELETE",
+                    url: `/deleteUser/${id}`
+                });
+
+                if (result === true) $(`#line${id}`).remove();
+                else alert("삭제하지 못했습니다.")
+            } catch (err) {
+                $("#user_list").html(JSON.stringify(err));
+            }
+        }else{
+            $(btn).text("삭제");
+            $(btn).prev().text("수정");
+            $(`#line${id}`).find("div:nth-child(1)").html(name);
+            $(`#line${id}`).find("div:nth-child(2)").html(email);
+            $("#upload-file").remove();
+        }
+    }
+
 </script>
+
+
 <script>
     async function listComment() {
         try{

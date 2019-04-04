@@ -30,14 +30,6 @@ public class User {
     public User(String username, String email){
         this.name = username;
         this.email = email;
-        this.storedPath = null;
-        this.originalFilename = null;
     }
 
-    public User(String name, String email, String storedPath, String originalFilename) {
-        this.name = name;
-        this.email = email;
-        this.storedPath = storedPath;
-        this.originalFilename = originalFilename;
-    }
 }

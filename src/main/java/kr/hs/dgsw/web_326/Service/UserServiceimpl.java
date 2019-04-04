@@ -33,8 +33,8 @@ public class UserServiceimpl implements UserService{
         else    return this.ur.save(u);
     }
 
-    public User updateUser(User u){
-        return this.ur.findById(u.getId())
+    public User updateUser(Long id,User u){
+        return this.ur.findById(id)
                 .map(user -> {
                     user.setName(Optional.ofNullable(u.getName()).orElse(user.getName()));
                     user.setEmail(Optional.ofNullable(u.getEmail()).orElse(user.getEmail()));
