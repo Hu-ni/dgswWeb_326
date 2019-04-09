@@ -21,6 +21,8 @@ public class Comment {
 
     private Long userId;
     private String content;
+    private String storedPath;
+    private String originalFilename;
 
     @CreationTimestamp
     private LocalDateTime created;
@@ -35,6 +37,8 @@ public class Comment {
     public Comment(Comment c){
         this.id = c.getId();
         this.userId = c.getUserId();
+        this.storedPath = c.getStoredPath();
+        this.originalFilename = c.getOriginalFilename();
         this.content = c.getContent();
         this.created = c.getCreated();
         this.modified = c.getModified();

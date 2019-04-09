@@ -7,6 +7,7 @@ import kr.hs.dgsw.web_326.Repository.CommentRepository;
 import kr.hs.dgsw.web_326.Repository.UserRepository;
 import kr.hs.dgsw.web_326.Service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -26,7 +27,7 @@ public class CommentServiceimpl implements CommentService {
 
     @PostConstruct
     private void init(){
-        User u = this.ur.save(new User("aaa","aabbccdd"));
+        User u = this.ur.save(new User("aaa","aabbccdd","123"));
         this.cr.save(new Comment(u.getId(), "hi there1"));
         this.cr.save(new Comment(u.getId(), "hi there2"));
         this.cr.save(new Comment(u.getId(), "hi there3"));
@@ -35,7 +36,7 @@ public class CommentServiceimpl implements CommentService {
 
     @Override
     public List<CommentUsernameProtocol> listAllComment() {
-        List<Comment> cList = this.cr.findAll();
+        List<Comment> cList = this.cr.findAll(new Sort(Sort.Direction.DESC, "created"));
         List<CommentUsernameProtocol> cupList = new ArrayList<>();
         cList.forEach(comment -> {
             Optional<User> found = this.ur.findById(comment.getUserId());
@@ -70,6 +71,8 @@ public class CommentServiceimpl implements CommentService {
                 .map(comment -> {
                     comment.setUserId(Optional.ofNullable(c.getUserId()).orElse(comment.getUserId()));
                     comment.setContent(Optional.ofNullable(c.getContent()).orElse(comment.getContent()));
+                    comment.setStoredPath(Optional.ofNullable(c.getStoredPath()).orElse(comment.getStoredPath()));
+                    comment.setOriginalFilename(Optional.ofNullable(c.getOriginalFilename()).orElse(comment.getOriginalFilename()));
                     return this.cr.save(comment);
                 }).orElse(null);
         if(temp != null){

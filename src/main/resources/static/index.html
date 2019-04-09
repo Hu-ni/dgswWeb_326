@@ -7,28 +7,126 @@
             src="http://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous"></script>
+    <style>
+        body {margin: 0}
+        header{
+            height:100px;
+            background-color: aqua;
+        }
+
+        aside{
+            position: absolute;
+            width: 200px;
+            right: 0;
+            background-color: cadetblue;
+            top: 100px;
+            bottom: 0;
+        }
+
+        section{
+            position: absolute;
+            top: 100px;
+            bottom: 0;
+            left: 0;
+            right: 200px;
+            background-color: coral;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /*footer{*/
+        /*    height: 100px;*/
+        /*    background-color: bisque;*/
+        /*    position: fixed;*/
+        /*    bottom: 0;*/
+        /*    left: 0;*/
+        /*    right: 0;*/
+        /*}*/
+        header, section, aside, footer{
+            border: 1px solid silver;
+        }
+    </style>
 </head>
 <body>
-<h1>유저 목록</h1>
-    <div>
-        <div>
-            <input type="text" id="name" placeholder="Name">
-            <input type="text" id="email" placeholder="Email">
-            <button onclick="addNewUser()">작성</button>
-            <button onclick="listUser()">조회</button>
-        </div>
-        <div id="user_list"></div>
-    </div>
-<h1>글 목록</h1>
-    <div>
-        <div>
-            <input type="text" id="content" placeholder="Comment">
-            <button onclick="addNewComment()">작성</button>
-            <button onclick="listComment()">조회</button>
-        </div>
-        <div id="comment_list"></div>
-    </div>
+<header><h1>DGSW SNS</h1></header>
+<section id="comment-list">
+    <button onclick="openCommentDialog()">새글쓰기</button>
+    <div id="show-comment"></div>
+</section>
+<aside id="user-info">
+    <div></div>
+    <div>이름</div>
+    <div>이메일</div>
+    <div>가입기간</div>
+    <button onclick="openLoginDialog()">로그인</button>
+</aside>
+<!--    <div>-->
+<!--        <div>-->
+<!--            <input type="text" id="name" placeholder="Name">-->
+<!--            <input type="text" id="email" placeholder="Email">-->
+<!--            <button onclick="addNewUser()">작성</button>-->
+<!--            <button onclick="listUser()">조회</button>-->
+<!--        </div>-->
+<!--        <div id="user_list"></div>-->
+<!--    </div>-->
+<!--<h1>글 목록</h1>-->
+<!--    <div>-->
+<!--        <div>-->
+<!--            <input type="text" id="content" placeholder="Comment">-->
+<!--            <button onclick="addNewComment()">작성</button>-->
+<!--            <button onclick="listComment()">조회</button>-->
+<!--        </div>-->
+<!--        <div id="comment_list"></div>-->
+<!--    </div>-->
+<style>
+    #login-container, #comment-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #000000aa;
+    }
 
+    .login-dialog, .comment-dialog{
+        text-align: center;
+        background-color: white;
+        position: relative;
+        width: 300px;
+    }
+
+</style>
+
+<div id="container" style="display: none;">
+    <div id="login-container">
+        <div class="login-dialog">
+            <div style="margin: 30px 0px 30px 0px;">로그인</div>
+            <div><input id="id" type="text" placeholder="아이디"></div>
+            <div><input id="password" type="password" placeholder="패스워드"></div>
+            <div style="margin: 30px 0px 30px 0px;">
+                <button onclick="userLogin()">확인</button>
+                <button onclick="closeLoginDialog()">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="container2" style="display: none;">
+    <div id="comment-container">
+        <div class="comment-dialog">
+            <div><input id="upload-file" type="file"></div>
+            <div><input id="comment" type="text" placeholder="사진 설명"></div>
+            <div style="margin: 30px 0px 30px 0px;">
+                <button onclick="addNewComment(this)">확인</button>
+                <button onclick="closeCommentDialog()">취소</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     async function listUser(){
@@ -44,7 +142,9 @@
                                             <div>
                                                 <button onclick="updateUser(this, ${user.id})">수정</button>
                                                 <button onclick="removeUser(this, ${user.id})">삭제</button>
+                                                <button onclick="download('user',${user.id})">사진 표시</button>
                                             </div>
+
                                         </div>`);
             }
         }catch(err){
@@ -73,12 +173,18 @@
                                             <div>
                                                 <button onclick="updateUser(this, ${result.id})">수정</button>
                                                 <button onclick="removeUser(this, ${result.id})">삭제</button>
+                                                <button onclick="download('user',${result.id})">사진 표시</button>
                                             </div>
                                             </div>`);
         }catch(err){
             $("#user_list").html(JSON.stringify(err));
         }
 
+    }
+
+    async function download(type, id){
+        let img = `<img src="attachment/${type}/${id}" alt="">`;
+        $(`#line${id}`).append(img);
     }
 
     let name;
@@ -90,14 +196,14 @@
             email = line.find("div:nth-child(2)").html();
             let input_name = `<input id="modifyName${id}" value="${name}">`
             let input_email = `<input id="modifyEmail${id}" value="${email}">`
-            let input_file = '<input id="upload-file" type="file">'
+            let input_file = '<input id="upload-profile" type="file">'
             line.find("div:nth-child(1)").html(input_name);
             line.find("div:nth-child(2)").html(input_email);
             line.find("div:nth-child(5)").append(input_file);
             $(btn).text("확인");
             $(btn).next().text("취소");
         }else{
-            let file = $("#upload-file")[0].files[0];
+            let file = $("#upload-profile")[0].files[0];
             let formData = new FormData();
             formData.append('srcFile',file);
             let fileInfo = await $.ajax({
@@ -129,7 +235,7 @@
 
             $(btn).text("수정");
             $(btn).next().text("삭제");
-            $("#upload-file").remove();
+            $("#upload-profile").remove();
         }
     }
 
@@ -151,106 +257,183 @@
             $(btn).prev().text("수정");
             $(`#line${id}`).find("div:nth-child(1)").html(name);
             $(`#line${id}`).find("div:nth-child(2)").html(email);
-            $("#upload-file").remove();
+            $("#upload-profile").remove();
         }
     }
 
 </script>
-
-
 <script>
-    async function listComment() {
-        try{
-            let list = await $.get("/list");
-            // $("#comment_list").html(JSON.stringify(list));
-            for(let i =0; i < list.length; i++){
-                let comment = list[i];
-                $("#comment_list").append(`<div id="line${comment.id}" style="display: flex; border-bottom: 1px solid silver;">
-                                        <div style="width: 150px;">${comment.username}</div>
-                                        <div style="width: 350px;">${comment.content}</div>
-                                        <div>
-                                            <button onclick="updateComment(this, ${comment.id})">수정</button>
-                                            <button onclick="removeComment(this, ${comment.id})">삭제</button>
-                                        </div>
-                                        </div>`);
-            }
-        }catch(err){
-            $("#comment_list").html(JSON.stringify(err));
+
+    $(document).ready(listComment());
+
+    function openCommentDialog(){
+        if($("#user-info").find("button").text() === "로그인")
+            openLoginDialog();
+        else{
+            $(`#container2`).show(400);
         }
     }
 
-    async function addNewComment(){
-        let comment ={
-            userId: 1,
-            content: $("#content").val()
-        };
-        try{
-            let result = await $.ajax({
-                url: "/comment",
-                type: "POST",
-                dataType: "json",
-                contentType: "application/json",
-                data: JSON.stringify(comment)
-            })
+    function closeCommentDialog(){
+        $(`#container2`).hide(1000);
+    }
 
-            $("#comment_list").append(`<div id="line${result.id}" style="display: flex; border-bottom: 1px solid silver;">
-                                            <div style="width: 150px;">${result.username}</div>
-                                            <div style="width: 350px;">${result.content}</div>
+    async function userLogin(){
+        try{
+            let id = $("#id").val();
+            let result = await $.get(`/view/${id}`);
+            if($("#password").val() === result.password){
+                $("#user-info").find("div:nth-child(1)").html(`<img src="attachment/user/${id}" alt="">`);
+                $("#user-info").find("div:nth-child(2)").text(result.name);
+                $("#user-info").find("div:nth-child(3)").text(result.email);
+                $("#user-info").find("div:nth-child(4)").text(result.created);
+                closeLoginDialog();
+
+                $("#user-info").find("button").text("로그아웃");
+            }
+
+        }catch(err){
+            console.log(err);
+        }
+    }
+
+    function closeLoginDialog(){
+        $('#container').hide(1000);
+    }
+
+    function openLoginDialog(){
+        if($("#user-info").find("button").text() === "로그인")
+            $("#container").show(400);
+        else {
+            $("#user-info").find("div:nth-child(1)").text("");
+            $("#user-info").find("div:nth-child(2)").text("이름");
+            $("#user-info").find("div:nth-child(3)").text("이메일");
+            $("#user-info").find("div:nth-child(4)").text("가입기간");
+            $("#user-info").find("button").text("로그인");
+        }
+    }
+
+    async function listComment() {
+            try{
+                let list = await $.get("/list");
+                $("#show-comment").html("");
+                for(let i =0; i < list.length; i++){
+                    let comment = list[i];
+                    $("#show-comment").append(`<div id="line${comment.id}" style="display: flex; border-bottom: 1px solid silver;">
+                                            <div >
+                                                <img style="width: auto; height: auto; max-width: 100px; max-height: 100px"
+                                                src="attachment/comment/${comment.id}" alt="">
+                                            </div>
+                                            <div style="width: 100px;">${comment.username}</div>
+                                            <div style="width: 150px;">${comment.content}</div>
+                                            <div style="width: 150px">${comment.created}</div>
                                             <div>
-                                                <button onclick="updateComment(this, ${result.id})">수정</button>
-                                                <button onclick="removeComment(this, ${result.id})">삭제</button>
+                                                <button onclick="updateComment(this, ${comment.id})">수정</button>
+                                                <button onclick="removeComment(this, ${comment.id})">삭제</button>
                                             </div>
                                             </div>`);
-        }catch(err){
-            $("#comment_list").html(JSON.stringify(err));
+                }
+            }catch(err){
+                $("#show-comment").html(JSON.stringify(err));
+            }
         }
+    let id=0;
+    async function addNewComment(btn){
+        if($(btn).text() === "확인"){
+            let file = $("#upload-file")[0].files[0];
+            let formData = new FormData();
+            formData.append('srcFile',file);
+            let fileInfo = await $.ajax({
+                type: "POST",
+                url: "/attachment",
+                data: formData,
+                processData: false,
+                contentType: false,
+                async: false
+            });
 
-    }
-
-    let content = null;
-    async function removeComment(btn, id) {
-        if($(btn).text() === "삭제"){
+            let comment ={
+                userId: 1,
+                content: $("#comment").val(),
+                storedPath: fileInfo.storedPath,
+                originalFilename: fileInfo.originalName
+            };
             try{
                 let result = await $.ajax({
-                    type: "DELETE",
-                    url: `/deleteComment/${id}`
-                });
-
-                if(result === true) $(`#line${id}`).remove();
-                else alert("삭제하지 못했습니다.")
-            }catch(err) {
-                $("#comment_list").html(JSON.stringify(err));
+                    url: "/comment",
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(comment)
+                })
+                closeCommentDialog();
+                listComment();
+            }catch(err){
+                console.log(JSON.stringify(err));
             }
-        }else{
-            $(btn).text("삭제");
-            $(btn).prev().text("수정");
-            $(`#line${id}`).find("div:nth-child(2)").html(content);
         }
+    }
 
+    async function removeComment(btn, id) {
+        try{
+            let result = await $.ajax({
+                type: "DELETE",
+                url: `/deleteComment/${id}`
+            });
+
+            if(result === true) $(`#line${id}`).remove();
+            else alert("삭제하지 못했습니다.")
+        }catch(err) {
+            $("#show-comment").html(JSON.stringify(err));
+        }
     }
 
     async function updateComment(btn, id){
         if($(btn).text() === "수정"){
+            openCommentDialog();
             let line = $(`#line${id}`);
-            content = line.find("div:nth-child(2)").html();
-            let input = `<input id="modify${id}" value="${content}">`
-            line.find("div:nth-child(2)").html(input);
-            $(btn).text("확인");
-            $(btn).next().text("취소");
+            let content = line.find("div:nth-child(3)").html();
+            $("#comment").val(content);
+            $(".comment-dialog").find("div:nth-child(3)").find("button:nth-child(1)").attr("onclick",`updateComment(this,${id})`);
         }else{
-            let comment = {
-                userId: 1,
-                content: $(`#modify${id}`).val()
-            };
+            let file = $("#upload-file")[0].files[0];
+            let comment;
+            if(file != null){
+                let formData = new FormData();
+                formData.append('srcFile',file);
+                let fileInfo = await $.ajax({
+                    type: "POST",
+                    url: '/attachment',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    async: false
+                });
+
+                comment = {
+                    userId: 1,
+                    content: $("#comment").val(),
+                    storedPath: fileInfo.storedPath,
+                    originalFilename: fileInfo.originalName
+                };
+            }else{
+                comment = {
+                    userId: 1,
+                    content: $("#comment").val()
+                }
+            }
+
             let result = await $.ajax({
                 type: "PUT",
                 url: `/updateComment/${id}`,
                 data: JSON.stringify(comment),
                 contentType: "application/json"
             });
-            $(`#line${id}`).find("div:nth-child(2)").html(result.content);
-            $(btn).text("수정");
-            $(btn).next().text("삭제");
+            $(`#line${id}`).find("div:nth-child(1)").html(`<img style="width: auto; height: auto; max-width: 100px; max-height: 100px"src="attachment/comment/${id}" alt="">`);
+            $(`#line${id}`).find("div:nth-child(3)").html(result.content);
+            $(".comment-dialog").find("div:nth-child(3)").find("button:nth-child(1)").attr("onclick",`addNewComment()`);
+
+            closeCommentDialog();
         }
     }
 </script>

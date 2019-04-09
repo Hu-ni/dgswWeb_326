@@ -3,6 +3,7 @@ package kr.hs.dgsw.web_326.Service;
 import kr.hs.dgsw.web_326.Domain.User;
 import kr.hs.dgsw.web_326.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,13 +17,12 @@ public class UserServiceimpl implements UserService{
 
     @Override
     public List<User> listAllUser() {
-        return ur.findAll();
+        return ur.findAll(new Sort(Sort.Direction.DESC, "created"));
     }
 
     @Override
     public User view(Long id) {
         return this.ur.findById(id)
-                .map(user-> Optional.ofNullable(ur.getOne(id)).orElse(null))
                 .orElse(null);
     }
 
@@ -40,6 +40,7 @@ public class UserServiceimpl implements UserService{
                     user.setEmail(Optional.ofNullable(u.getEmail()).orElse(user.getEmail()));
                     user.setStoredPath(Optional.ofNullable(u.getStoredPath()).orElse(user.getStoredPath()));
                     user.setOriginalFilename(Optional.ofNullable(u.getOriginalFilename()).orElse(user.getOriginalFilename()));
+                    user.setPassword(Optional.ofNullable(u.getPassword()).orElse(user.getPassword()));
                     return this.ur.save(user);
                 })
                 .orElse(null);

@@ -47,7 +47,9 @@ Content-Type: application/json
 
 {
   "userId": "1",
-  "content": "after"
+  "content": "after",
+  "storedPath": "123",
+  "originalFilename": "123"
 }
 
 ###

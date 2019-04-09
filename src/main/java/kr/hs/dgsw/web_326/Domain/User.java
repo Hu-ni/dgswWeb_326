@@ -21,15 +21,17 @@ public class User {
     private String email;
     private String storedPath;
     private String originalFilename;
+    private String password;
 
     @CreationTimestamp
     private LocalDateTime created;
     @UpdateTimestamp
     private LocalDateTime modified;
 
-    public User(String username, String email){
+    public User(String username, String email, String password){
         this.name = username;
         this.email = email;
+        this.password = password;
     }
 
 }
